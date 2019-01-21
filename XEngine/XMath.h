@@ -85,7 +85,7 @@ typedef struct PLANE2D_TYP {
 
 typedef struct MATRIX_TYP {
 	union {
-		float M[16];
+		float M[16] = { 0 };
 		struct {
 			float M11_, M12_, M13_, M14_;
 			float M21_, M22_, M23_, M24_;
@@ -103,7 +103,7 @@ MATRIX LocalToWorldMatrix(MATRIX local_);
 // 행렬 변환 함수
 void Translate(LPTRANSFORM, VECTOR3D);
 void Translate(float, float, float);
-
+void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m);
 //------------------------------------------------------------//
 // 출력 관련 
 

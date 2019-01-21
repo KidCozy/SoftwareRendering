@@ -8,6 +8,7 @@ namespace linecolor {
 		BG_RED,
 		BG_GREEN,
 		BG_BLUE,
+		BG_BLACK,
 	};
 	enum FGCOLOR {
 		FG_RED,

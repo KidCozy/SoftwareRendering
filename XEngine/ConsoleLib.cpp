@@ -5,6 +5,7 @@ void ChangeLineColor(BGCOLOR BG, FGCOLOR FG)
 
 
 	switch (FG) {
+
 		case FG_RED:
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
 			break;
@@ -20,6 +21,9 @@ void ChangeLineColor(BGCOLOR BG, FGCOLOR FG)
 	}
 
 	switch (BG) {
+	case BG_BLACK:
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_RED & BACKGROUND_GREEN & BACKGROUND_BLUE & BACKGROUND_INTENSITY);
+		break;
 	case BG_RED:
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_RED);
 		

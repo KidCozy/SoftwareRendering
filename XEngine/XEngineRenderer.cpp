@@ -10,6 +10,34 @@ ULONG mCurrentColor;
 TestStar Group[16];
 TestStar* star = Group;
 
+mesh meshBox;
+
+VECTOR2D vertices[4] = {
+	{-10, 10},
+	{10, 10},
+	{10,-10},
+	{-10,-10}
+};
+
+VECTOR2D* verticesPtr = vertices;
+
+
+MATRIX BoxMat;	
+
+
+VECTOR3D BoxVertices[8] = {
+	{-100.0f, 100.0f, 1.0f},  
+	{ 100.0f, 100.0f, 1.0f},  
+	{ -100.0f, -100.0f, 1.0f },
+	{ 100.0f, -100.0f, 1.0f},
+	{ -100.0f, 100.0f, 1.0f},
+	{ 100.0f, 100.0f, 1.0f },
+	{ -100.0f, -100.0f, 1.0f },
+	{ 100.0f, -100.0f, 1.0f},
+};
+
+VECTOR3D* BoxVerticesPtr = BoxVertices;
+
 void XEngineRenderer::SetParams() {
 	temp.p0 = { mWidth/2,mHeight/2 };
 
@@ -24,6 +52,39 @@ void XEngineRenderer::Init(HWND hWnd) {
 	mWidth = mRect.right;
 	mHeight = mRect.bottom;
 	mIsRender = TRUE;
+
+	mTheta = 0.0f;
+	
+	//-----------------------------------//
+
+	meshBox.tris = {
+
+		// SOUTH
+		{ 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f },
+		{ 0.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f },
+
+		// EAST                                                      
+		{ 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 0.0f, 1.0f },
+
+		// NORTH                                                     
+		{ 1.0f, 0.0f, 1.0f,    1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 0.0f, 1.0f },
+
+		// WEST                                                      
+		{ 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 0.0f },
+
+		// TOP                                                       
+		{ 0.0f, 1.0f, 0.0f,    0.0f, 1.0f, 1.0f,    1.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f, 0.0f },
+
+		// BOTTOM                                                    
+		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f },
+
+	};
+
 }
 
 
@@ -34,17 +95,17 @@ VECTOR2D start2 = { 127,32 };
 VECTOR2D dest2 = { 73,-22 };
 
 // ·»´õ ±¸°£
-void XEngineRenderer::Render()
+void XEngineRenderer::Render(float pDelta)
 {
+	delta = pDelta;
 	mDevice_.SetColor(0, 255, 255);
 
 	Clear();
 	//RayFill();
 //	DrawStar(star);
 	mDevice_.SetColor(0, 0, 0);
-	//DrawLine({ 0,0 }, { 256,2
 
-	DrawStar(star);
+	DrawMesh(meshBox);
 //	Line(start2, dest2);
 
 
@@ -92,12 +153,6 @@ void XEngineRenderer::Clear()
 	}
 	return;
 }
-
-VECTOR2D vertices[3] = {
-	{25,25},
-	{25,50},
-	{50,25}
-};
 
 void XEngineRenderer::RayFill()
 {
@@ -157,15 +212,26 @@ void XEngineRenderer::DrawStar(TestStar* star)
 	for (int i = 0; i < 16; i++) {
 		//star[i].mPos = star[i].mPos * ;
 
-	
+		
 
 		int x = star[i].mPos.x / star[i].mPos.z;
 		int y = star[i].mPos.y / star[i].mPos.z;
 
-		star[i].mPos.z -= 0.1f;
+		star[i].mPos.z += 0.1f;
+
+		if (x < 256)
+			ChangeLineColor(BG_GREEN, FG_BLACK);
+		else
+			ChangeLineColor(BG_RED, FG_BLACK);
+
+		cout << "STAR (" << star[i].mPos.x << ", " << star[i].mPos.y << ", " << star[i].mPos.z << ")" << endl;
+		
 
 		PixelOut(x,y);
 	}
+	
+	ChangeLineColor(BG_BLACK, FG_BLACK);
+	system("cls");
 }
 
 
@@ -194,12 +260,127 @@ void XEngineRenderer::LineDraw(VECTOR2D start, VECTOR2D dest) {
 	
 }
 
+void XEngineRenderer::DrawPlane(VECTOR2D * vertices)
+{
+	for (int i = 0; i < 4; i++) {
+		if (i + 1 < 4)
+			DrawGDILine(vertices[i], vertices[i + 1]);
+		else
+			DrawGDILine(vertices[i], vertices[0]);
+	}
+}
+
+void XEngineRenderer::DrawMesh(mesh mesh)
+{
+	MATRIX matRotZ, matRotX;
+
+	mTheta += 0.1f * delta;
+
+	matRotZ.M11_ = cosf(mTheta);
+	matRotZ.M12_ = sinf(mTheta);
+	matRotZ.M21_ = -sinf(mTheta);
+	matRotZ.M22_ = cosf(mTheta);
+	matRotZ.M33_ = 1;
+	matRotZ.M44_ = 1; 
+
+
+	matRotX.M11_ = 1;
+	matRotX.M22_ = cosf(mTheta);
+	matRotX.M23_ = sinf(mTheta);
+	matRotX.M32_ = -sinf(mTheta);
+	matRotX.M33_ = cosf(mTheta);
+	matRotX.M44_ = 1;
+
+	for (auto tri : mesh.tris) {
+		triangle ProjectedTri, TranslatedTri, RotatedTriZ, RotatedTriZX;
+
+		MultiplyMatrixVector(tri.p[0], RotatedTriZ.p[0], matRotZ);
+		MultiplyMatrixVector(tri.p[1], RotatedTriZ.p[1], matRotZ);
+		MultiplyMatrixVector(tri.p[2], RotatedTriZ.p[2], matRotZ);
+
+		MultiplyMatrixVector(RotatedTriZ.p[0], RotatedTriZX.p[0], matRotX);
+		MultiplyMatrixVector(RotatedTriZ.p[1], RotatedTriZX.p[1], matRotX);
+		MultiplyMatrixVector(RotatedTriZ.p[2], RotatedTriZX.p[2], matRotX);
+
+
+		TranslatedTri = RotatedTriZX;
+		TranslatedTri.p[0].z = RotatedTriZX.p[0].z + 2.0f;
+		TranslatedTri.p[1].z = RotatedTriZX.p[1].z + 2.0f;
+		TranslatedTri.p[2].z = RotatedTriZX.p[2].z + 2.0f;
+			
+
+		//TranslatedTri = tri;
+		//TranslatedTri.p[0].z = tri.p[0].z + 1.5f;
+		//TranslatedTri.p[1].z = tri.p[1].z + 1.5f;
+		//TranslatedTri.p[2].z = tri.p[2].z + 1.5f;
+
+
+		MultiplyMatrixVector(TranslatedTri.p[0], ProjectedTri.p[0], cam.mMat);
+		MultiplyMatrixVector(TranslatedTri.p[1], ProjectedTri.p[1], cam.mMat);
+		MultiplyMatrixVector(TranslatedTri.p[2], ProjectedTri.p[2], cam.mMat);
+	
+		ProjectedTri.p[0].x += 1.0f; ProjectedTri.p[0].y += 1.0f;
+		ProjectedTri.p[1].x += 1.0f; ProjectedTri.p[1].y += 1.0f;
+		ProjectedTri.p[2].x += 1.0f; ProjectedTri.p[2].y += 1.0f;
+
+		ProjectedTri.p[0].x *= 0.5f* (float)mWidth;
+		ProjectedTri.p[0].y *= 0.5f* (float)mHeight;
+
+		ProjectedTri.p[1].x *= 0.5f* (float)mWidth;
+		ProjectedTri.p[1].y *= 0.5f* (float)mHeight;
+
+		ProjectedTri.p[2].x *= 0.5f* (float)mWidth;
+		ProjectedTri.p[2].y *= 0.5f* (float)mHeight;
+
+		
+
+		DrawTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
+			ProjectedTri.p[1].x, ProjectedTri.p[1].y,
+			ProjectedTri.p[2].x, ProjectedTri.p[2].y);
+	}
+}
+
+void XEngineRenderer::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
+	
+	VECTOR2D xy1 = { x1,y1 };
+	VECTOR2D xy2 = { x2,y2 };
+	VECTOR2D xy3 = { x3,y3 };
+
+	DrawGDILine(xy1, xy2);
+	DrawGDILine(xy2, xy3);
+	DrawGDILine(xy3, xy1);
+}
+
+void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
+	
+	VECTOR2D xy1 = { x1,y1 };
+	VECTOR2D xy2 = { x2,y2 };
+	VECTOR2D xy3 = { x3,y3 };
+
+
+
+}
+
+//
+//void XEngineRenderer::DrawMesh(mesh mesh)
+//{
+//
+//	for (auto tri : mesh.tris)
+//
+//		for (int i = 0; i < 8; i++) {
+//			if (i + 1 < 8)
+//				DrawGDILine(vertices[i], vertices[i + 1]);
+//			else
+//				DrawGDILine(vertices[i], vertices[0]);
+//
+//		}
+//}
+
+
 void XEngineRenderer::Line(VECTOR2D start, VECTOR2D dest) {
 
 	int x0, x1;
 	int y0, y1;
-
-	VECTOR2D swStart, swDest;
 
 	float W, H;
 
@@ -318,14 +499,40 @@ bool XEngineRenderer::DrawLine(VECTOR2D start, VECTOR2D dest)
 
 
 
+void XEngineRenderer::DrawGDILine(VECTOR2D start, VECTOR2D dest)
+{
+	int w = (mWidth / 2);
+	int h = (mHeight / 2);
+	MoveToEx(mDevice_.PeekDC(), start.x, start.y, NULL);
+	LineTo(mDevice_.PeekDC(), dest.x, dest.y);
+
+}
+
+//void XEngineRenderer::DrawGDILine(VECTOR2D start, VECTOR2D dest)
+//{
+//	int w = (mWidth / 2);
+//	int h = (mHeight / 2);
+//
+//	int sx = start.x;
+//	int sy = start.y;
+//
+//	int ex = dest.x;
+//	int ey = dest.y;
+//
+//	MoveToEx(mDevice_.PeekDC(), sx+ w, sy + h, NULL);
+//	LineTo(mDevice_.PeekDC(), ex + w, ey + h);
+//
+//}
+
 bool XEngineRenderer::IsInArea(int x, int y)
 {
 	
 	return (abs(x) < (mWidth / 2)) && (abs(y) < mHeight / 2);
 }
 
-XEngineRenderer::XEngineRenderer()
+XEngineRenderer::XEngineRenderer() : cam(PrimeCamera(160, 1000.0f, 0.1f, mHeight, mWidth))
 {
+	
 }
 
 XEngineRenderer::~XEngineRenderer()

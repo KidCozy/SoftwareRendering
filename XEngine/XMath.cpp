@@ -86,7 +86,16 @@ MATRIX LocalToWorldMatrix(MATRIX local_)
 	
 }
 
+void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m) {
+	o.x = i.x * m.M11_ + i.y * m.M21_ + i.z * m.M31_ + m.M41_;
+	o.y = i.x * m.M12_ + i.y * m.M22_ + i.z * m.M32_ + m.M42_;
+	o.z = i.x * m.M13_ + i.y * m.M23_ + i.z * m.M33_ + m.M43_;
+	float w = i.x * m.M14_ + i.y * m.M24_ + i.z * m.M34_ + m.M44_;
 
+	if (w != 0.0f) {
+		o.x /= w; o.y /= w; o.z /= w;
+	}
+}
 
 
 void Translate(LPTRANSFORM target, VECTOR3D offset_) {

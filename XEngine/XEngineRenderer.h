@@ -1,9 +1,13 @@
 #pragma once
 #include"X3DDevice.h"
 #include"XMath.h"
+#include"Mesh.h"
 #include"PrimeCamera.h"
 #include"PrimeEngine.h"
 #include"TestStar.h"
+
+#include"ConsoleLib.h"
+
 #include<Windows.h>
 
 using namespace std;
@@ -27,14 +31,16 @@ class XEngineRenderer
 private:
 
 	X3DDevice mDevice_;
-	
+	float delta;
 	RECT mRect;
+	float mTheta;
+	PrimeCamera cam;
 
 public:
 
 	void SetParams();
 	void Init(HWND hWnd);
-	void Render();
+	void Render(float delta);
 	void Release(HWND hWnd);
 
 	//Primitive
@@ -53,6 +59,12 @@ public:
 	void LineDraw(VECTOR2D start, VECTOR2D dest);
 	void Draw2DPlane(PLANE2D plane_);
 	void DrawLineByBresenHam(POINT2D from, POINT2D to, COLORREF color);
+
+	void DrawPlane(VECTOR2D* vertices);
+	void DrawBox(VECTOR3D* vertices);
+	void DrawMesh(mesh vertices);
+	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
+	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
 
 	void ShowPoints(VECTOR2D pnt) {
 
@@ -77,6 +89,8 @@ public:
 
 	void DrawGizmos(AXIS Center);
 	
+	void DrawGDILine(VECTOR2D start, VECTOR2D dest);
+	void DrawGDILine(VECTOR3D start, VECTOR3D dest);
 
 	bool IsInArea(int x, int y);
 
