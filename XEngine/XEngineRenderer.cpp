@@ -11,6 +11,10 @@ TestStar Group[16];
 TestStar* star = Group;
 
 mesh meshBox;
+triangle FillTri = {
+	{0,100, 300, 100, 100,0}
+
+};
 
 VECTOR2D vertices[4] = {
 	{-10, 10},
@@ -23,6 +27,7 @@ VECTOR2D* verticesPtr = vertices;
 
 
 MATRIX BoxMat;	
+
 
 
 VECTOR3D BoxVertices[8] = {
@@ -106,6 +111,7 @@ void XEngineRenderer::Render(float pDelta)
 	mDevice_.SetColor(0, 0, 0);
 
 	DrawMesh(meshBox);
+	FillTriangle(FillTri.p[0].x, FillTri.p[0].y, FillTri.p[1].x, FillTri.p[1].y, FillTri.p[2].x, FillTri.p[2].y, RGB(0, 0, 0));
 //	Line(start2, dest2);
 
 
@@ -351,13 +357,108 @@ void XEngineRenderer::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	DrawGDILine(xy3, xy1);
 }
 
-void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
+void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, COLORREF color) {
 	
+	mDevice_.SetColor(GetRValue(color), GetGValue(color), GetBValue(color));
+
 	VECTOR2D xy1 = { x1,y1 };
 	VECTOR2D xy2 = { x2,y2 };
 	VECTOR2D xy3 = { x3,y3 };
 
+	VECTOR2D sorted[3];
 
+	int width = 0, height = 0;
+	int InsideOut = 0;
+	int xVal = 0;
+
+	// 2 4 1
+	// 1 2 4
+
+	if (y1 > y2) {
+		std::swap(y1, y2);
+	}
+	if (y2 > y3) {
+		std::swap(y2, y3);
+	}
+	if (y3 > y1) {
+		std::swap(y3, y1);
+	}
+	if (y1 > y3) {
+		std::swap(y1, y3);
+	}
+	if (y3 > y2) {
+		std::swap(y3, y2);
+	}
+	if (y2 > y1) {
+		std::swap(y2, y1);
+	}
+
+	if (x1 > x2) {
+		std::swap(x1, x2);
+	}
+	if (x2 > x3) {
+		std::swap(x2, x3);
+	}
+	if (x3 > x1) {
+		std::swap(x3, x1);
+	}
+	if (x1 > x3) {
+		std::swap(x1, x3);
+	}
+	if (x3 > x2) {
+		std::swap(x3, x2);
+	}
+	if (x2 > x1) {
+		std::swap(x2, x1);
+	}
+
+	// y3 is largest number
+	triangle tri = {
+		{x1,y1,x2,y2,x3,y3} };
+
+
+	for (int x = x3; x < x1; x++) {
+		for (int y = y3; y < y1; y++) {
+			if (Collide({ x,y },tri)) {
+				PixelOut(x, y);
+			}
+		}
+	}
+
+}
+
+bool XEngineRenderer::Collide(VECTOR2D point, triangle tri) {
+	
+	int x1, x2, x3, y1, y2, y3;
+	int px, py;
+
+	px = point.x;
+	py = point.y;
+
+	x1 = tri.p[0].x;
+	x2 = tri.p[1].x;
+	x3 = tri.p[2].x;
+
+	y1 = tri.p[0].y;
+	y2 = tri.p[1].y;
+	y3 = tri.p[2].y;
+
+	// 2 4 1
+	// 1 2 4
+
+	// 1 2 3
+	
+
+	float areaOrig = abs((x2 - x1)*(y3 - y1) - (x3 - x1)*(y2 - y1));
+	float area1 = abs((x1 - px)*(y2 - py) - (x2 - px)*(y1 - py));
+	float area2 = abs((x2 - px)*(y3 - py) - (x3 - px)*(y2 - py));
+	float area3 = abs((x3 - px)*(y1 - py) - (x1 - px)*(y3 - py));
+
+
+	if (area1 + area2 + area3 == areaOrig) {
+		return true;
+	}
+	return false;
 
 }
 

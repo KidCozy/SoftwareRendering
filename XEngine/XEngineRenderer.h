@@ -64,7 +64,9 @@ public:
 	void DrawBox(VECTOR3D* vertices);
 	void DrawMesh(mesh vertices);
 	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
-	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
+	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, COLORREF color);
+
+	
 
 	void ShowPoints(VECTOR2D pnt) {
 
@@ -93,6 +95,7 @@ public:
 	void DrawGDILine(VECTOR3D start, VECTOR3D dest);
 
 	bool IsInArea(int x, int y);
+	bool Collide(VECTOR2D point, triangle tri);
 
 	XEngineRenderer();
 	XEngineRenderer(HWND hWnd);
