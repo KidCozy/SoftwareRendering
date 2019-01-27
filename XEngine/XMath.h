@@ -1,5 +1,7 @@
 #pragma once
 
+struct mesh;
+
 #include<iostream>
 //-----------------------------상수----------------------------//
 
@@ -93,6 +95,7 @@ typedef struct MATRIX_TYP {
 			float M41_, M42_, M43_, M44_;
 		};
 	};
+	
 } MATRIX, *LPMATRIX, TRANSFORM, *LPTRANSFORM;
 
 //------------------------------------------------------------//
@@ -101,8 +104,10 @@ MATRIX LocalToWorldMatrix(MATRIX local_);
 
 //------------------------------------------------------------//
 // 행렬 변환 함수
-void Translate(LPTRANSFORM, VECTOR3D);
-void Translate(float, float, float);
+void Translate(MATRIX&, VECTOR3D);
+void Rotate(MATRIX&, VECTOR3D);
+void Scale(MATRIX&, VECTOR3D);
+
 void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m);
 //------------------------------------------------------------//
 // 출력 관련 

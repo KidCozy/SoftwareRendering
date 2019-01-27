@@ -111,7 +111,7 @@ void XEngineRenderer::Render(float pDelta)
 	mDevice_.SetColor(0, 0, 0);
 
 	DrawMesh(meshBox);
-	FillTriangle(FillTri.p[0].x, FillTri.p[0].y, FillTri.p[1].x, FillTri.p[1].y, FillTri.p[2].x, FillTri.p[2].y, RGB(0, 0, 0));
+//	FillTriangle(FillTri.p[0].x, FillTri.p[0].y, FillTri.p[1].x, FillTri.p[1].y, FillTri.p[2].x, FillTri.p[2].y, RGB(0, 0, 0));
 //	Line(start2, dest2);
 
 
@@ -276,9 +276,18 @@ void XEngineRenderer::DrawPlane(VECTOR2D * vertices)
 	}
 }
 
+void XEngineRenderer::RenderObject(Object obj) {
+	for (auto tri : obj.Mesh->tris) {
+		triangle ProjectedTri;
+		MultiplyMatrixVector(tri.p[0], ProjectedTri.p[0], obj.Transform);
+		MultiplyMatrixVector(tri.p[0], ProjectedTri.p[1], obj.Transform);
+		MultiplyMatrixVector(tri.p[0], ProjectedTri.p[1], obj.Transform);
+	}
+}
+
 void XEngineRenderer::DrawMesh(mesh mesh)
 {
-	MATRIX matRotZ, matRotX;
+	MATRIX matRotZ, matRotX, matMovX;
 
 	mTheta += 0.1f * delta;
 
@@ -289,7 +298,6 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 	matRotZ.M33_ = 1;
 	matRotZ.M44_ = 1; 
 
-
 	matRotX.M11_ = 1;
 	matRotX.M22_ = cosf(mTheta);
 	matRotX.M23_ = sinf(mTheta);
@@ -297,8 +305,21 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 	matRotX.M33_ = cosf(mTheta);
 	matRotX.M44_ = 1;
 
+	matMovX.M11_ = 1;
+	matMovX.M22_ = 1;
+	matMovX.M33_ = 1;
+	matMovX.M44_ = 1;
+	
+	
+
+	//matRotZ = matRotZ * VECTOR4D{ 0.5, 0.5, 0.5,1.0 };
+
+//	matRotZ.M42_ = -0.25;
+//	matRotX.M42_ = -0.25;
+
+	//	cam.mMat.M41_ = -1;
 	for (auto tri : mesh.tris) {
-		triangle ProjectedTri, TranslatedTri, RotatedTriZ, RotatedTriZX;
+		triangle ProjectedTri, TranslatedTri, RotatedTriZ, RotatedTriZX, MovedTriX;
 
 		MultiplyMatrixVector(tri.p[0], RotatedTriZ.p[0], matRotZ);
 		MultiplyMatrixVector(tri.p[1], RotatedTriZ.p[1], matRotZ);
@@ -308,17 +329,16 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 		MultiplyMatrixVector(RotatedTriZ.p[1], RotatedTriZX.p[1], matRotX);
 		MultiplyMatrixVector(RotatedTriZ.p[2], RotatedTriZX.p[2], matRotX);
 
+		MultiplyMatrixVector(RotatedTriZX.p[0], MovedTriX.p[0], matMovX);
+		MultiplyMatrixVector(RotatedTriZX.p[1], MovedTriX.p[1], matMovX);
+		MultiplyMatrixVector(RotatedTriZX.p[2], MovedTriX.p[2], matMovX);
 
-		TranslatedTri = RotatedTriZX;
-		TranslatedTri.p[0].z = RotatedTriZX.p[0].z + 2.0f;
-		TranslatedTri.p[1].z = RotatedTriZX.p[1].z + 2.0f;
-		TranslatedTri.p[2].z = RotatedTriZX.p[2].z + 2.0f;
-			
+		TranslatedTri = MovedTriX;
+		TranslatedTri.p[0].z = MovedTriX.p[0].z + 2.0f;
+		TranslatedTri.p[1].z = MovedTriX.p[1].z + 2.0f;
+		TranslatedTri.p[2].z = MovedTriX.p[2].z + 2.0f;
 
-		//TranslatedTri = tri;
-		//TranslatedTri.p[0].z = tri.p[0].z + 1.5f;
-		//TranslatedTri.p[1].z = tri.p[1].z + 1.5f;
-		//TranslatedTri.p[2].z = tri.p[2].z + 1.5f;
+		
 
 
 		MultiplyMatrixVector(TranslatedTri.p[0], ProjectedTri.p[0], cam.mMat);
@@ -362,7 +382,7 @@ void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	mDevice_.SetColor(GetRValue(color), GetGValue(color), GetBValue(color));
 
 	VECTOR2D xy1 = { x1,y1 };
-	VECTOR2D xy2 = { x2,y2 };
+	VECTOR2D xy2 = { x2,y2  };
 	VECTOR2D xy3 = { x3,y3 };
 
 	VECTOR2D sorted[3];
@@ -426,6 +446,8 @@ void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	}
 
 }
+
+
 
 bool XEngineRenderer::Collide(VECTOR2D point, triangle tri) {
 	
@@ -631,7 +653,7 @@ bool XEngineRenderer::IsInArea(int x, int y)
 	return (abs(x) < (mWidth / 2)) && (abs(y) < mHeight / 2);
 }
 
-XEngineRenderer::XEngineRenderer() : cam(PrimeCamera(160, 1000.0f, 0.1f, mHeight, mWidth))
+XEngineRenderer::XEngineRenderer() : cam(PrimeCamera(90, 1000.0f, 0.1f, mHeight, mWidth))
 {
 	
 }

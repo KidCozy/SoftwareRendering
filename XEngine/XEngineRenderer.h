@@ -1,6 +1,7 @@
 #pragma once
 #include"X3DDevice.h"
 #include"XMath.h"
+#include"XComponents.h"
 #include"Mesh.h"
 #include"PrimeCamera.h"
 #include"PrimeEngine.h"
@@ -66,6 +67,7 @@ public:
 	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
 	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, COLORREF color);
 
+	void RenderObject(Object obj);
 	
 
 	void ShowPoints(VECTOR2D pnt) {

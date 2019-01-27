@@ -21,7 +21,7 @@ MATRIX CMProjectionMatrix = {
 };
 
 
-MATRIX_TYP operator*(MATRIX_TYP p1, VECTOR4D p2) {
+MATRIX_TYP operator*(MATRIX p1, VECTOR4D p2) {
 	MATRIX_TYP retVal;
 
 	retVal.M11_ = p1.M11_ * p2.x;
@@ -98,8 +98,28 @@ void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m) {
 }
 
 
-void Translate(LPTRANSFORM target, VECTOR3D offset_) {
-	
+void Translate(MATRIX& target, VECTOR3D offset_) {
+
+	MATRIX TranslateMat;
+
+	TranslateMat.M11_ = 1;
+	TranslateMat.M22_ = 1;
+	TranslateMat.M33_ = 1;
+	TranslateMat.M44_ = 1;
+
+	TranslateMat.M41_ = offset_.x;
+	TranslateMat.M42_ = offset_.y;
+	TranslateMat.M43_ = offset_.z;
+
+	MultiplyMatrixVector()
+
+	target.M41_ += offset_.x;
+	target.M42_ += offset_.y;
+	target.M43_ += offset_.z;
+}
+
+void Rotate(MATRIX& target, VECTOR3D offset_) {
+
 }
 
 
