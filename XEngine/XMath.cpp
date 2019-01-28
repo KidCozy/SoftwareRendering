@@ -75,6 +75,23 @@ MATRIX_TYP operator*(MATRIX_TYP p1, MATRIX_TYP p2) {
 
 }
 
+VECTOR3D operator*=(VECTOR3D& vect, float flt) {
+	vect.x *= flt;
+	vect.y *= flt;
+	vect.z *= flt;
+
+	return vect;
+}
+
+VECTOR3D operator*(VECTOR3D vect, float flt) {
+	
+	vect.x *= flt;
+	vect.y *= flt;
+	vect.z *= flt;
+
+	return vect;
+}
+
 
 MATRIX LocalToWorldMatrix(MATRIX local_)
 {
@@ -98,7 +115,16 @@ void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m) {
 }
 
 
+void MultiplyMatrixVector(VECTOR3D & o, MATRIX & m) {
+	o.x = m.M11_ + m.M21_ + m.M31_ + m.M41_;
+	o.y = m.M12_ + m.M22_ + m.M32_ + m.M42_;
+	o.z = m.M13_ + m.M23_ + m.M33_ + m.M43_;
+	float w = m.M14_ + m.M24_ + m.M34_ + m.M44_;
 
+	if (w != 0.0f) {
+		o.x /= w; o.y /= w; o.z /= w;
+	}
+}
 
 
 

@@ -11,6 +11,9 @@ TestStar Group[16];
 TestStar* star = Group;
 
 mesh meshBox;
+Object BoxObject;
+
+
 triangle FillTri = {
 	{0,100, 300, 100, 100,0}
 
@@ -43,13 +46,7 @@ VECTOR3D BoxVertices[8] = {
 
 VECTOR3D* BoxVerticesPtr = BoxVertices;
 
-void XEngineRenderer::SetParams() {
-	temp.p0 = { mWidth/2,mHeight/2 };
-
-}
-
 void XEngineRenderer::Init(HWND hWnd) {
-	SetParams();
 	mDevice_.Init(hWnd);
 
 	GetClientRect(hWnd, &mRect);
@@ -90,6 +87,9 @@ void XEngineRenderer::Init(HWND hWnd) {
 
 	};
 
+	BoxObject.Mesh = meshBox;
+	
+
 }
 
 
@@ -99,35 +99,30 @@ VECTOR2D mDest;
 VECTOR2D start2 = { 127,32 };
 VECTOR2D dest2 = { 73,-22 };
 
+VECTOR3D RotateVar = { 50,1,0 };
+VECTOR3D TranslateVar = { 1,1,1 };
+VECTOR3D ScaleVar = { 1,1,1 };
 // 렌더 구간
 void XEngineRenderer::Render(float pDelta)
 {
 	delta = pDelta;
+
 	mDevice_.SetColor(0, 255, 255);
-
 	Clear();
-	//RayFill();
-//	DrawStar(star);
+
 	mDevice_.SetColor(0, 0, 0);
-
 	DrawMesh(meshBox);
-//	FillTriangle(FillTri.p[0].x, FillTri.p[0].y, FillTri.p[1].x, FillTri.p[1].y, FillTri.p[2].x, FillTri.p[2].y, RGB(0, 0, 0));
-//	Line(start2, dest2);
 
-
-//	ShowPoints(start2);
-//	ShowPoints(dest2);
-
+	Rotate(BoxObject, RotateVar);
+//	cout << RotateVar.x << endl;
 	mDevice_.SwapChain();
 }
-
 void XEngineRenderer::Release(HWND hWnd)
 {
 	mDevice_.Release(hWnd);
 	mDevice_.~X3DDevice();
 	this->~XEngineRenderer();
 }
-
 void XEngineRenderer::PixelOut(int x, int y)
 {
 	if (!IsInArea(x, y)) return;
@@ -136,7 +131,6 @@ void XEngineRenderer::PixelOut(int x, int y)
 	DWORD offset = mWidth * mHeight / 2 + mWidth / 2 + x + mWidth * -y;
 	*(dest + offset) = mCurrentColor;
 }
-
 void XEngineRenderer::Clear()
 {
 	/*int x = -mWidth / 2, y = -mHeight / 2;
@@ -159,7 +153,6 @@ void XEngineRenderer::Clear()
 	}
 	return;
 }
-
 void XEngineRenderer::RayFill()
 {
 
@@ -212,7 +205,6 @@ void XEngineRenderer::RayFill()
 	return;
 
 }
-
 void XEngineRenderer::DrawStar(TestStar* star)
 {
 	for (int i = 0; i < 16; i++) {
@@ -239,10 +231,6 @@ void XEngineRenderer::DrawStar(TestStar* star)
 	ChangeLineColor(BG_BLACK, FG_BLACK);
 	system("cls");
 }
-
-
-// y = mx+b
-
 void XEngineRenderer::LineDraw(VECTOR2D start, VECTOR2D dest) {
 
 	int W = dest.x - start.x;
@@ -265,7 +253,6 @@ void XEngineRenderer::LineDraw(VECTOR2D start, VECTOR2D dest) {
 
 	
 }
-
 void XEngineRenderer::DrawPlane(VECTOR2D * vertices)
 {
 	for (int i = 0; i < 4; i++) {
@@ -277,12 +264,7 @@ void XEngineRenderer::DrawPlane(VECTOR2D * vertices)
 }
 
 void XEngineRenderer::RenderObject(Object obj) {
-	for (auto tri : obj.Mesh->tris) {
-		triangle ProjectedTri;
-		MultiplyMatrixVector(tri.p[0], ProjectedTri.p[0], obj.Transform);
-		MultiplyMatrixVector(tri.p[0], ProjectedTri.p[1], obj.Transform);
-		MultiplyMatrixVector(tri.p[0], ProjectedTri.p[1], obj.Transform);
-	}
+	DrawMesh(obj.Mesh);
 }
 
 void XEngineRenderer::DrawMesh(mesh mesh)
@@ -319,11 +301,8 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 	
 	
 	for (auto tri : mesh.tris) {
-		triangle ProjectedTri, TranslatedTri, RotatedTriZ, RotatedTriZX, MovedTriX;
-
-		Translate(tri.p[0], { 0,1 * mTheta * 0.1f,0 });
-		Translate(tri.p[1], { 0,1 * mTheta * 0.1f,0 });
-		Translate(tri.p[2], { 0,1 * mTheta * 0.1f,0 });
+	//	VECTOR3D MovX = { 0,1 * mTheta * 0.1f,0 };
+		triangle ProjectedTri, TranslatedTri;
 
 		TranslatedTri = tri;
 		TranslatedTri.p[0].z = tri.p[0].z + 2.0f;
@@ -439,8 +418,6 @@ void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y
 
 }
 
-
-
 bool XEngineRenderer::Collide(VECTOR2D point, triangle tri) {
 	
 	int x1, x2, x3, y1, y2, y3;
@@ -475,22 +452,6 @@ bool XEngineRenderer::Collide(VECTOR2D point, triangle tri) {
 	return false;
 
 }
-
-//
-//void XEngineRenderer::DrawMesh(mesh mesh)
-//{
-//
-//	for (auto tri : mesh.tris)
-//
-//		for (int i = 0; i < 8; i++) {
-//			if (i + 1 < 8)
-//				DrawGDILine(vertices[i], vertices[i + 1]);
-//			else
-//				DrawGDILine(vertices[i], vertices[0]);
-//
-//		}
-//}
-
 
 void XEngineRenderer::Line(VECTOR2D start, VECTOR2D dest) {
 
@@ -612,8 +573,6 @@ bool XEngineRenderer::DrawLine(VECTOR2D start, VECTOR2D dest)
 	return true;
 }
 
-
-
 void XEngineRenderer::DrawGDILine(VECTOR2D start, VECTOR2D dest)
 {
 	int w = (mWidth / 2);
@@ -622,22 +581,6 @@ void XEngineRenderer::DrawGDILine(VECTOR2D start, VECTOR2D dest)
 	LineTo(mDevice_.PeekDC(), dest.x, dest.y);
 
 }
-
-//void XEngineRenderer::DrawGDILine(VECTOR2D start, VECTOR2D dest)
-//{
-//	int w = (mWidth / 2);
-//	int h = (mHeight / 2);
-//
-//	int sx = start.x;
-//	int sy = start.y;
-//
-//	int ex = dest.x;
-//	int ey = dest.y;
-//
-//	MoveToEx(mDevice_.PeekDC(), sx+ w, sy + h, NULL);
-//	LineTo(mDevice_.PeekDC(), ex + w, ey + h);
-//
-//}
 
 bool XEngineRenderer::IsInArea(int x, int y)
 {
@@ -649,94 +592,6 @@ XEngineRenderer::XEngineRenderer() : cam(PrimeCamera(90, 1000.0f, 0.1f, mHeight,
 {
 	
 }
-
 XEngineRenderer::~XEngineRenderer()
 {
 }
-
-
-
-
-
-//
-//void XEngineRenderer::RayFill(HWND hWnd, HDC mDC, COLORREF bgColor, POINT2D axis) {
-//
-//	// bgColor = COLOR_BLACK;
-//
-//	int count = 0;
-//
-//	COLORREF borderColor;
-//
-//	borderColor = RGB(0, 0, 0);
-//
-//
-//	
-//}
-//
-//void XEngineRenderer::DrawLine(PARMLINE2D line_) {
-//	MoveToEx(mDC, line_.p0.x, line_.p0.y, NULL);
-//	LineTo(mDC, line_.p1.x, line_.p1.y);
-//}
-//
-//void XEngineRenderer::DrawGizmos(AXIS Center) {
-//	
-//	PARMLINE2D horizontal, vertical;
-//
-//	horizontal.p0 = { 0, mHeight / 2 };
-//	horizontal.p1 = { mWidth, mHeight / 2 };
-//
-//	vertical.p0 = { mWidth / 2, 0 };
-//	vertical.p1 = { mWidth / 2 , mHeight };
-//
-//	
-//	DrawLine(horizontal);
-//	DrawLine(vertical);
-//}
-//
-//void XEngineRenderer::DrawLineByBresenHam(POINT2D from, POINT2D to, COLORREF color) {
-//
-//	// 1. x와 y 각각의 변화량을 구한다.
-//	int W = from.x - to.x;
-//	int H = from.y - to.y;
-//
-//	int p = 2 * H - W;
-//
-//	while (from.x <= to.x) {
-//		if (p > 0)
-//		{
-//			SetPixel(mDC, from.x, from.y, color);
-//			from.y++;
-//			p = p + 2 * H - 2 * W;
-//		}
-//		else
-//		{
-//			SetPixel(mDC, from.x, from.y,color);
-//			from.y++;
-//			p = p + 2 * H;
-//		}
-//		from.x++;
-//	}
-//		
-//
-//}
-//
-//void XEngineRenderer::Draw2DPlane(PLANE2D plane_)
-//{
-//	PARMLINE2D E[3];
-//	int size = 25;
-//
-//	E[0] = { {plane_.p0.x ,plane_.p0.y - size},{plane_.p0.x + size,plane_.p0.y + size} };
-//	E[1] = { {plane_.p0.x + size,plane_.p0.y + size},{plane_.p0.x - size,plane_.p0.y + size} };
-//	E[2] = { {plane_.p0.x - size,plane_.p0.y + size},{plane_.p0.x ,plane_.p0.y - size} };
-//	
-//	for (int i = 0; i < 3; i++) {
-//		DrawLine(E[i]);
-//	}
-//}
-//
-//
-//void XEngineRenderer::Draw2DSquare(SQUARE2D sqr_) {
-//	
-//
-//}
-//

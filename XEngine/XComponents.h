@@ -6,5 +6,6 @@
 
 typedef struct object {
 	MATRIX Transform;
-	MESH Mesh;
+	mesh Mesh;
+
 } Object, *LPObject;

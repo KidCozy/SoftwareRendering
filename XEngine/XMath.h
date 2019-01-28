@@ -107,7 +107,12 @@ MATRIX LocalToWorldMatrix(MATRIX local_);
 
 
 void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m);
+void MultiplyMatrixVector(VECTOR3D & o, MATRIX & m);
 //------------------------------------------------------------//
 // 출력 관련 
 
 void DrawMatrix(MATRIX mat);
+
+
+VECTOR3D operator*=(VECTOR3D& vect, float flt);
+VECTOR3D operator*(VECTOR3D vect, float flt);

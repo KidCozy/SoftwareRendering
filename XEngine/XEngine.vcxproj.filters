@@ -34,6 +34,9 @@
     <Filter Include="Library\StarField">
       <UniqueIdentifier>{b351bd0d-da17-4907-9019-c7f1748b5129}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Library\Console">
+      <UniqueIdentifier>{03738555-931b-4e9a-bd5a-7f91816dddbb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -70,7 +73,13 @@
       <Filter>Library\StarField</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleLib.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Library\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="XComponents.h">
+      <Filter>Definitions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -102,7 +111,7 @@
       <Filter>Library\StarField</Filter>
     </ClCompile>
     <ClCompile Include="ConsoleLib.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Library\Console</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

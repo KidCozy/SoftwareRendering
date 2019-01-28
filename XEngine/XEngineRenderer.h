@@ -1,6 +1,7 @@
 #pragma once
 #include"X3DDevice.h"
 #include"XMath.h"
+#include"X3DMath.h"
 #include"XComponents.h"
 #include"Mesh.h"
 #include"PrimeCamera.h"
