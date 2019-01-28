@@ -104,9 +104,7 @@ MATRIX LocalToWorldMatrix(MATRIX local_);
 
 //------------------------------------------------------------//
 // 행렬 변환 함수
-void Translate(MATRIX&, VECTOR3D);
-void Rotate(MATRIX&, VECTOR3D);
-void Scale(MATRIX&, VECTOR3D);
+
 
 void MultiplyMatrixVector(VECTOR3D & i, VECTOR3D & o, MATRIX & m);
 //------------------------------------------------------------//

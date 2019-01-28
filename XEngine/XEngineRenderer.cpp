@@ -287,9 +287,11 @@ void XEngineRenderer::RenderObject(Object obj) {
 
 void XEngineRenderer::DrawMesh(mesh mesh)
 {
-	MATRIX matRotZ, matRotX, matMovX;
+	MATRIX matRotZ, matRotX;
 
 	mTheta += 0.1f * delta;
+
+
 
 	matRotZ.M11_ = cosf(mTheta);
 	matRotZ.M12_ = sinf(mTheta);
@@ -304,11 +306,6 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 	matRotX.M32_ = -sinf(mTheta);
 	matRotX.M33_ = cosf(mTheta);
 	matRotX.M44_ = 1;
-
-	matMovX.M11_ = 1;
-	matMovX.M22_ = 1;
-	matMovX.M33_ = 1;
-	matMovX.M44_ = 1;
 	
 	
 
@@ -318,25 +315,20 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 //	matRotX.M42_ = -0.25;
 
 	//	cam.mMat.M41_ = -1;
+	
+	
+	
 	for (auto tri : mesh.tris) {
 		triangle ProjectedTri, TranslatedTri, RotatedTriZ, RotatedTriZX, MovedTriX;
 
-		MultiplyMatrixVector(tri.p[0], RotatedTriZ.p[0], matRotZ);
-		MultiplyMatrixVector(tri.p[1], RotatedTriZ.p[1], matRotZ);
-		MultiplyMatrixVector(tri.p[2], RotatedTriZ.p[2], matRotZ);
+		Translate(tri.p[0], { 0,1 * mTheta * 0.1f,0 });
+		Translate(tri.p[1], { 0,1 * mTheta * 0.1f,0 });
+		Translate(tri.p[2], { 0,1 * mTheta * 0.1f,0 });
 
-		MultiplyMatrixVector(RotatedTriZ.p[0], RotatedTriZX.p[0], matRotX);
-		MultiplyMatrixVector(RotatedTriZ.p[1], RotatedTriZX.p[1], matRotX);
-		MultiplyMatrixVector(RotatedTriZ.p[2], RotatedTriZX.p[2], matRotX);
-
-		MultiplyMatrixVector(RotatedTriZX.p[0], MovedTriX.p[0], matMovX);
-		MultiplyMatrixVector(RotatedTriZX.p[1], MovedTriX.p[1], matMovX);
-		MultiplyMatrixVector(RotatedTriZX.p[2], MovedTriX.p[2], matMovX);
-
-		TranslatedTri = MovedTriX;
-		TranslatedTri.p[0].z = MovedTriX.p[0].z + 2.0f;
-		TranslatedTri.p[1].z = MovedTriX.p[1].z + 2.0f;
-		TranslatedTri.p[2].z = MovedTriX.p[2].z + 2.0f;
+		TranslatedTri = tri;
+		TranslatedTri.p[0].z = tri.p[0].z + 2.0f;
+		TranslatedTri.p[1].z = tri.p[1].z + 2.0f;
+		TranslatedTri.p[2].z = tri.p[2].z + 2.0f;
 
 		
 

@@ -86,9 +86,6 @@ public:
 
 	void Draw2DSquare(SQUARE2D sqr_);
 
-	void Translate(VECTOR3D offset_);
-	void Translate(float x, float y, float z);
-
 	
 
 	void DrawGizmos(AXIS Center);
