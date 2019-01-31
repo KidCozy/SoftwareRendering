@@ -309,14 +309,14 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 		MultiplyMatrixVector(TranslatedTri.p[2], RotateX.p[2], matRotX);
 
 
-	//	MultiplyMatrixVector(RotateX.p[0], RotateXZ.p[0], matRotZ);
-	//	MultiplyMatrixVector(RotateX.p[1], RotateXZ.p[1], matRotZ);
-	//	MultiplyMatrixVector(RotateX.p[2], RotateXZ.p[2], matRotZ);
+		MultiplyMatrixVector(RotateX.p[0], RotateXZ.p[0], matRotZ);
+		MultiplyMatrixVector(RotateX.p[1], RotateXZ.p[1], matRotZ);
+		MultiplyMatrixVector(RotateX.p[2], RotateXZ.p[2], matRotZ);
 
 
-		MultiplyMatrixVector(RotateX.p[0], ProjectedTri.p[0], cam.mMat);
-		MultiplyMatrixVector(RotateX.p[1], ProjectedTri.p[1], cam.mMat);
-		MultiplyMatrixVector(RotateX.p[2], ProjectedTri.p[2], cam.mMat);
+		MultiplyMatrixVector(RotateXZ.p[0], ProjectedTri.p[0], cam.mMat);
+		MultiplyMatrixVector(RotateXZ.p[1], ProjectedTri.p[1], cam.mMat);
+		MultiplyMatrixVector(RotateXZ.p[2], ProjectedTri.p[2], cam.mMat);
 	
 		
 		ProjectedTri.p[0].x += 1.0f; ProjectedTri.p[0].y += 1.0f;
@@ -333,13 +333,13 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 		ProjectedTri.p[2].y *= 0.5f* (float)mHeight;
 
 		
-		FillTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
+	/*	FillTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
 			ProjectedTri.p[1].x, ProjectedTri.p[1].y,
-			ProjectedTri.p[2].x, ProjectedTri.p[2].y, RGB(0,0,0));
+			ProjectedTri.p[2].x, ProjectedTri.p[2].y, RGB(0,0,0));*/
 
-	/*	DrawTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
+		DrawTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
 			ProjectedTri.p[1].x, ProjectedTri.p[1].y,
-			ProjectedTri.p[2].x, ProjectedTri.p[2].y);*/
+			ProjectedTri.p[2].x, ProjectedTri.p[2].y);
 	}
 }
 
@@ -361,9 +361,9 @@ void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	
 //	mDevice_.SetColor(GetRValue(color), GetGValue(color), GetBValue(color));
 
-	VECTOR2D xy1 = { x1,y1 };
-	VECTOR2D xy2 = { x2,y2 };
-	VECTOR2D xy3 = { x3,y3 };
+	VECTOR3D xy1 = { x1,y1 };
+	VECTOR3D xy2 = { x2,y2 };
+	VECTOR3D xy3 = { x3,y3 };
 
 	VECTOR3D sorted[3];
 
@@ -374,39 +374,39 @@ void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	// 2 4 1
 	// 1 2 4
 
-	if (y1 < y2) {
+	if (y1 > y2) {
 		std::swap(xy1, xy2);
 	}
-	if (y2 < y3) {
+	if (y2 > y3) {
 		std::swap(xy2, xy3);
 	}
-	if (y3 < y1) {
+	if (y3 > y1) {
 		std::swap(xy3, xy1);
 	}
-	if (y1 < y3) {
+	if (y1 > y3) {
 		std::swap(xy1, xy3);
 	}
-	if (y3 < y2) {
+	if (y3 > y2) {
 		std::swap(xy3, xy2);
 	}
-	if (y2 < y1) {
+	if (y2 > y1) {
 		std::swap(xy2, xy1);
 	}
 
 
-	if (y2 == y3)
+	if (xy2.y == xy3.y)
 	{
 		fillBottomFlatTriangle(xy1, xy2, xy3);
 	}
 	/* check for trivial case of top-flat triangle */
-	else if (y1 == y2)
+	else if (xy1.y == xy2.y)
 	{
 		fillTopFlatTriangle(xy1, xy2, xy3);
 	}
 	else
 	{
 		/* general case - split the triangle in a topflat and bottom-flat one */
-		VECTOR2D v4 = {(int)(xy1.x + ((float)(xy2.y - xy1.y) / (float)(xy3.y - xy1.y)) * (xy3.x - xy1.x), xy2.y) };
+		VECTOR3D v4 = {(int)(xy1.x + ((float)(xy2.y - xy1.y) / (float)(xy3.y - xy1.y)) * (xy3.x - xy1.x), xy2.y) };
 		fillBottomFlatTriangle(xy1, xy2, v4);
 		fillTopFlatTriangle(xy2, v4, xy3);
 	}
@@ -583,7 +583,7 @@ void XEngineRenderer::DrawFillPoly(int x, int y, COLORREF color) {
 
 }
 
-void XEngineRenderer::fillBottomFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D v3)
+void XEngineRenderer::fillBottomFlatTriangle(VECTOR3D v1, VECTOR3D v2, VECTOR3D v3)
 {
 		float invslope1 = (v2.x - v1.x) / (v2.y - v1.y);
 		float invslope2 = (v3.x - v1.x) / (v3.y - v1.y);
@@ -606,7 +606,7 @@ void XEngineRenderer::fillBottomFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D 
 
 }
 
-void XEngineRenderer::fillTopFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D v3)
+void XEngineRenderer::fillTopFlatTriangle(VECTOR3D v1, VECTOR3D v2, VECTOR3D v3)
 {
 		float invslope1 = (v3.x - v1.x) / (v3.y - v1.y);
 		float invslope2 = (v3.x - v2.x) / (v3.y - v2.y);
