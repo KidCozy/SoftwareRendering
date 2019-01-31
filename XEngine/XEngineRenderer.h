@@ -92,7 +92,11 @@ public:
 	void DrawGizmos(AXIS Center);
 	
 	void DrawGDILine(VECTOR2D start, VECTOR2D dest);
-	void DrawGDILine(VECTOR3D start, VECTOR3D dest);
+	void DrawFillPoly(int x, int y, COLORREF color);
+	
+	void fillBottomFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D v3);
+	void fillTopFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D v3);
+
 
 	bool IsInArea(int x, int y);
 	bool Collide(VECTOR2D point, triangle tri);

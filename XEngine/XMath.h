@@ -33,26 +33,27 @@ typedef struct SQUARE2D_TYP {
 
 typedef struct VECTOR2D_TYP {
 	union {
-		int M[2];
+		int M[2] = { 0 };
 		struct {
-			int x;
-			int y;
+			int x, y;
 		};
 	};
+
 } VECTOR2D, POINT2D, *LPVECTOR2D, *LPPOINT2D;
 
 typedef struct VECTOR3D_TYP {
 	union {
-		float M[3];
+		float M[3] = { 0 };
 		struct {
 			float x, y, z;
 		};
 	};
+
 } VECTOR3D, POINT3D, *LPVECTOR3D, *LPPOINT3D;
 
 typedef struct VECTOR4D_TYP {
 	union {
-		float M[4];
+		float M[4] = { 0 };
 		struct {
 			float x, y, z, w;
 		};

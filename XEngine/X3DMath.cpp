@@ -24,6 +24,10 @@ void Translate(Object& target, VECTOR3D offset_) {
 
 void Rotate(Object& target, VECTOR3D offset_) {
 
+	mesh temp;
+
+	temp = target.Mesh;
+
 	if (offset_.x > 0.0f || offset_.x < 0.0f) {
 		target.Transform.M22_ += cosf(offset_.x);
 		target.Transform.M23_ += sinf(offset_.x);
@@ -51,15 +55,7 @@ void Rotate(Object& target, VECTOR3D offset_) {
 		target.Transform.M22_ += cosf(offset_.y);
 	}
 
-
-	for (auto tri : target.Mesh.tris) {
-		//cout << "Rotate : " << tri.p[0].x << endl;
-		MultiplyMatrixVector(tri.p[0], target.Transform);
-		MultiplyMatrixVector(tri.p[1], target.Transform);
-		MultiplyMatrixVector(tri.p[2], target.Transform);
-	}
-
-	DrawMatrix(target.Transform);
+	//DrawMatrix(target.Transform);
 
 	// cos a, 0, sin a, 0,
 	//   0  , 1,   0  , 0,

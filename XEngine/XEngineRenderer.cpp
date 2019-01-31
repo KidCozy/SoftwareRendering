@@ -111,7 +111,7 @@ void XEngineRenderer::Render(float pDelta)
 	Clear();
 
 	mDevice_.SetColor(0, 0, 0);
-	DrawMesh(meshBox);
+	RenderObject(BoxObject);
 
 	Rotate(BoxObject, RotateVar);
 //	cout << RotateVar.x << endl;
@@ -265,6 +265,8 @@ void XEngineRenderer::DrawPlane(VECTOR2D * vertices)
 
 void XEngineRenderer::RenderObject(Object obj) {
 	DrawMesh(obj.Mesh);
+
+	DrawMatrix(obj.Transform);
 }
 
 void XEngineRenderer::DrawMesh(mesh mesh)
@@ -289,33 +291,34 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 	matRotX.M33_ = cosf(mTheta);
 	matRotX.M44_ = 1;
 	
-	
-
-	//matRotZ = matRotZ * VECTOR4D{ 0.5, 0.5, 0.5,1.0 };
-
-//	matRotZ.M42_ = -0.25;
-//	matRotX.M42_ = -0.25;
-
-	//	cam.mMat.M41_ = -1;
-	
-	
-	
 	for (auto tri : mesh.tris) {
 	//	VECTOR3D MovX = { 0,1 * mTheta * 0.1f,0 };
-		triangle ProjectedTri, TranslatedTri;
+		triangle ProjectedTri, TranslatedTri, RotateX, RotateXZ;
+
+		
+
+
 
 		TranslatedTri = tri;
 		TranslatedTri.p[0].z = tri.p[0].z + 2.0f;
 		TranslatedTri.p[1].z = tri.p[1].z + 2.0f;
 		TranslatedTri.p[2].z = tri.p[2].z + 2.0f;
 
-		
+		MultiplyMatrixVector(TranslatedTri.p[0], RotateX.p[0], matRotX);
+		MultiplyMatrixVector(TranslatedTri.p[1], RotateX.p[1], matRotX);
+		MultiplyMatrixVector(TranslatedTri.p[2], RotateX.p[2], matRotX);
 
 
-		MultiplyMatrixVector(TranslatedTri.p[0], ProjectedTri.p[0], cam.mMat);
-		MultiplyMatrixVector(TranslatedTri.p[1], ProjectedTri.p[1], cam.mMat);
-		MultiplyMatrixVector(TranslatedTri.p[2], ProjectedTri.p[2], cam.mMat);
+	//	MultiplyMatrixVector(RotateX.p[0], RotateXZ.p[0], matRotZ);
+	//	MultiplyMatrixVector(RotateX.p[1], RotateXZ.p[1], matRotZ);
+	//	MultiplyMatrixVector(RotateX.p[2], RotateXZ.p[2], matRotZ);
+
+
+		MultiplyMatrixVector(RotateX.p[0], ProjectedTri.p[0], cam.mMat);
+		MultiplyMatrixVector(RotateX.p[1], ProjectedTri.p[1], cam.mMat);
+		MultiplyMatrixVector(RotateX.p[2], ProjectedTri.p[2], cam.mMat);
 	
+		
 		ProjectedTri.p[0].x += 1.0f; ProjectedTri.p[0].y += 1.0f;
 		ProjectedTri.p[1].x += 1.0f; ProjectedTri.p[1].y += 1.0f;
 		ProjectedTri.p[2].x += 1.0f; ProjectedTri.p[2].y += 1.0f;
@@ -330,10 +333,13 @@ void XEngineRenderer::DrawMesh(mesh mesh)
 		ProjectedTri.p[2].y *= 0.5f* (float)mHeight;
 
 		
-
-		DrawTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
+		FillTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
 			ProjectedTri.p[1].x, ProjectedTri.p[1].y,
-			ProjectedTri.p[2].x, ProjectedTri.p[2].y);
+			ProjectedTri.p[2].x, ProjectedTri.p[2].y, RGB(0,0,0));
+
+	/*	DrawTriangle(ProjectedTri.p[0].x, ProjectedTri.p[0].y,
+			ProjectedTri.p[1].x, ProjectedTri.p[1].y,
+			ProjectedTri.p[2].x, ProjectedTri.p[2].y);*/
 	}
 }
 
@@ -346,17 +352,20 @@ void XEngineRenderer::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	DrawGDILine(xy1, xy2);
 	DrawGDILine(xy2, xy3);
 	DrawGDILine(xy3, xy1);
+	
+	DrawFillPoly(x2+5,y2+5, RGB(0, 0, 0));
+	SetPixel(mDevice_.PeekDC(), x2+5, y2+5, RGB(255, 0, 0));
 }
 
 void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, COLORREF color) {
 	
-	mDevice_.SetColor(GetRValue(color), GetGValue(color), GetBValue(color));
+//	mDevice_.SetColor(GetRValue(color), GetGValue(color), GetBValue(color));
 
 	VECTOR2D xy1 = { x1,y1 };
-	VECTOR2D xy2 = { x2,y2  };
+	VECTOR2D xy2 = { x2,y2 };
 	VECTOR2D xy3 = { x3,y3 };
 
-	VECTOR2D sorted[3];
+	VECTOR3D sorted[3];
 
 	int width = 0, height = 0;
 	int InsideOut = 0;
@@ -365,55 +374,41 @@ void XEngineRenderer::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y
 	// 2 4 1
 	// 1 2 4
 
-	if (y1 > y2) {
-		std::swap(y1, y2);
+	if (y1 < y2) {
+		std::swap(xy1, xy2);
 	}
-	if (y2 > y3) {
-		std::swap(y2, y3);
+	if (y2 < y3) {
+		std::swap(xy2, xy3);
 	}
-	if (y3 > y1) {
-		std::swap(y3, y1);
+	if (y3 < y1) {
+		std::swap(xy3, xy1);
 	}
-	if (y1 > y3) {
-		std::swap(y1, y3);
+	if (y1 < y3) {
+		std::swap(xy1, xy3);
 	}
-	if (y3 > y2) {
-		std::swap(y3, y2);
+	if (y3 < y2) {
+		std::swap(xy3, xy2);
 	}
-	if (y2 > y1) {
-		std::swap(y2, y1);
-	}
-
-	if (x1 > x2) {
-		std::swap(x1, x2);
-	}
-	if (x2 > x3) {
-		std::swap(x2, x3);
-	}
-	if (x3 > x1) {
-		std::swap(x3, x1);
-	}
-	if (x1 > x3) {
-		std::swap(x1, x3);
-	}
-	if (x3 > x2) {
-		std::swap(x3, x2);
-	}
-	if (x2 > x1) {
-		std::swap(x2, x1);
+	if (y2 < y1) {
+		std::swap(xy2, xy1);
 	}
 
-	// y3 is largest number
-	triangle tri = {
-		{x1,y1,x2,y2,x3,y3} };
 
-
-	for (int x = x3; x < x1; x++) {
-		for (int y = y3; y < y1; y++) {
-			if (Collide({ x,y },tri)) {
-				PixelOut(x, y);
-			}
-		}
+	if (y2 == y3)
+	{
+		fillBottomFlatTriangle(xy1, xy2, xy3);
+	}
+	/* check for trivial case of top-flat triangle */
+	else if (y1 == y2)
+	{
+		fillTopFlatTriangle(xy1, xy2, xy3);
+	}
+	else
+	{
+		/* general case - split the triangle in a topflat and bottom-flat one */
+		VECTOR2D v4 = {(int)(xy1.x + ((float)(xy2.y - xy1.y) / (float)(xy3.y - xy1.y)) * (xy3.x - xy1.x), xy2.y) };
+		fillBottomFlatTriangle(xy1, xy2, v4);
+		fillTopFlatTriangle(xy2, v4, xy3);
 	}
 
 }
@@ -459,7 +454,7 @@ void XEngineRenderer::Line(VECTOR2D start, VECTOR2D dest) {
 	int y0, y1;
 
 	float W, H;
-
+	
 	x0 = start.x;
 	x1 = dest.x;
 
@@ -581,6 +576,61 @@ void XEngineRenderer::DrawGDILine(VECTOR2D start, VECTOR2D dest)
 	LineTo(mDevice_.PeekDC(), dest.x, dest.y);
 
 }
+
+void XEngineRenderer::DrawFillPoly(int x, int y, COLORREF color) {
+
+//	FloodFill(mDevice_.PeekDC(), x, y, color);
+
+}
+
+void XEngineRenderer::fillBottomFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D v3)
+{
+		float invslope1 = (v2.x - v1.x) / (v2.y - v1.y);
+		float invslope2 = (v3.x - v1.x) / (v3.y - v1.y);
+
+		float curx1 = v1.x;
+		float curx2 = v1.x;
+
+		for (int scanlineY = v1.y; scanlineY <= v2.y; scanlineY++)
+		{
+			VECTOR2D start, dest;
+
+			start = { (int)curx1, scanlineY };
+			dest = { (int)curx2, scanlineY };
+
+			DrawGDILine(start, dest);
+
+			curx1 += invslope1;
+			curx2 += invslope2;
+		}
+
+}
+
+void XEngineRenderer::fillTopFlatTriangle(VECTOR2D v1, VECTOR2D v2, VECTOR2D v3)
+{
+		float invslope1 = (v3.x - v1.x) / (v3.y - v1.y);
+		float invslope2 = (v3.x - v2.x) / (v3.y - v2.y);
+
+		float curx1 = v3.x;
+		float curx2 = v3.x;
+
+		for (int scanlineY = v3.y; scanlineY > v1.y; scanlineY--)
+		{
+			VECTOR2D start = { (int)curx1, scanlineY };
+			VECTOR2D dest = {(int)curx2, scanlineY };
+
+			DrawGDILine(start, dest);
+			
+			
+			curx1 -= invslope1;
+			curx2 -= invslope2;
+		}
+
+
+}
+
+
+
 
 bool XEngineRenderer::IsInArea(int x, int y)
 {
